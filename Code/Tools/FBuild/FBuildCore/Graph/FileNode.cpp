@@ -100,6 +100,23 @@ void FileNode::HandleWarningsClangGCC( Job * job, const AString & name, const AS
     }
 }
 
+// HandleWarningsClangTidy
+//------------------------------------------------------------------------------
+void FileNode::HandleWarningsClangTidy( Job * job, const AString & name, const AString & data )
+{
+    if ( data.IsEmpty() )
+    {
+        return;
+    }
+
+    // Are there any warnings? (string is ok even in non-English)
+    if ( data.Find( "warning: " ) )
+    {
+        const bool treatAsWarnings = true;
+        DumpOutput( job, name, data, treatAsWarnings );
+    }
+}
+
 // DumpOutput
 //------------------------------------------------------------------------------
 void FileNode::DumpOutput( Job * job, const AString & name, const AString & data, bool treatAsWarnings )

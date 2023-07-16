@@ -797,6 +797,17 @@ Node::BuildResult ObjectNode::DoBuild_QtRCC( Job * job )
         return NODE_RESULT_FAILED; // compile has logged error
     }
 
+    if ( GetCompiler() && GetCompiler()->GetCompilerFamily() == CompilerNode::CompilerFamily::CLANG_TIDY )
+    {
+        // to prevent future errors, create an output file for clang-tidy even if there were no replacement
+        if ( !FileIO::FileExists( GetName().Get() ) )
+        {
+            FileStream f;
+            f.Open( GetName().Get(), FileStream::WRITE_ONLY );
+        }
+        HandleWarningsClangTidy( job, GetName(), ch.GetOut() );
+    }
+
     // record new file time
     RecordStampFromBuiltFile();
 
@@ -940,6 +951,7 @@ bool ObjectNode::ProcessIncludesWithPreProcessor( Job * job )
         case CompilerNode::CompilerFamily::MSVC:            flags.Set( CompilerFlags::FLAG_MSVC );              break;
         case CompilerNode::CompilerFamily::CLANG:           flags.Set( CompilerFlags::FLAG_CLANG );             break;
         case CompilerNode::CompilerFamily::CLANG_CL:        flags.Set( CompilerFlags::FLAG_CLANG_CL );          break;
+        case CompilerNode::CompilerFamily::CLANG_TIDY:      flags.Set( CompilerFlags::FLAG_CLANG_TIDY );        break;
         case CompilerNode::CompilerFamily::GCC:             flags.Set( CompilerFlags::FLAG_GCC );               break;
         case CompilerNode::CompilerFamily::SNC:             flags.Set( CompilerFlags::FLAG_SNC );               break;
         case CompilerNode::CompilerFamily::CODEWARRIOR_WII: flags.Set( CompilerFlags::CODEWARRIOR_WII );        break;
